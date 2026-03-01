@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <name>Assign_Lead_Score</name>
+        <label>Assign Lead Score</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Lead_Score__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Total_Lead_Score_Formula</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <decisions>
+        <description>Lead Score should get freeze when Lead Qualified</description>
+        <name>Freeze_Score</name>
+        <label>Freeze Score?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Assign_Lead_Score</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Calculate Score</defaultConnectorLabel>
+        <rules>
+            <name>Freeze</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Status__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <stringValue>New</stringValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Status__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <stringValue>Working</stringValue>
+                </rightValue>
+            </conditions>
+            <label>Freeze</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>ExpectedValue_Score_Formula</name>
+        <dataType>Number</dataType>
+        <expression>IF(ISBLANK($Record.Expected_Value__c), 0.0,
+IF($Record.Expected_Value__c &gt; 100000, 30.0,
+IF($Record.Expected_Value__c &gt;= 50000, 20.0, 10.0)))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>Source_Score_Formula</name>
+        <dataType>Number</dataType>
+        <expression>CASE(TEXT($Record.Source__c),
+     &quot;Website&quot;, 10.0,
+     &quot;Phone&quot;, 20.0,
+     &quot;Email&quot;, 15.0,
+     &quot;Referral&quot;, 25.0,
+     &quot;Social Media&quot;, 12.0,
+     0.0)</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>Status_Score_Formula</name>
+        <dataType>Number</dataType>
+        <expression>IF(TEXT($Record.Status__c) = &quot;New&quot;, 10.0,
+IF(TEXT($Record.Status__c )= &quot;Working&quot;, 30.0, 0.0))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>Total_Lead_Score_Formula</name>
+        <dataType>Number</dataType>
+        <expression>{!Status_Score_Formula} + {!Source_Score_Formula} + {!ExpectedValue_Score_Formula}</expression>
+        <scale>0</scale>
+    </formulas>
+    <interviewLabel>Sales Lead – Calculate Lead Score (Before Save) {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Sales Lead – Calculate Lead Score (Before Save)</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Freeze_Score</targetReference>
+        </connector>
+        <object>Sales_Lead__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>
