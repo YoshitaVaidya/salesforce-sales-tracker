@@ -5,6 +5,21 @@
         <members>Sales_Lead__c</members>
         <name>CustomObject</name>
     </types>
+
+    <types>
+        <members>Sales_Lead_Calculate_Lead_Score_Before_Save</members>
+        <name>Flow</name>
+    </types>
+
+    <types>
+        <members>Sales_Lead__c-Sales Lead Layout</members>
+        <name>Layout</name>
+    </types>
+
+    <types>
+        <members>Sales_Tracker</members>
+        <name>CustomApplication</name>
+    </types>
  
     <version>66.0</version>
 
