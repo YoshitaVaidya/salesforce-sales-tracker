@@ -3,6 +3,20 @@
     <apiVersion>65.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
+        <description>Assigns High priority to leads with score &gt;= 70.</description>
+        <name>Assign_High_Priority</name>
+        <label>Assign High Priority</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Lead_Priority__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>High</stringValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <assignments>
         <name>Assign_Lead_Score</name>
         <label>Assign Lead Score</label>
         <locationX>0</locationX>
@@ -14,7 +28,86 @@
                 <elementReference>Total_Lead_Score_Formula</elementReference>
             </value>
         </assignmentItems>
+        <connector>
+            <targetReference>Check_Lead_Priority</targetReference>
+        </connector>
     </assignments>
+    <assignments>
+        <description>Assigns Low priority to leads with score below 40.</description>
+        <name>Assign_Low_Priority</name>
+        <label>Assign Low Priority</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Lead_Priority__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Low</stringValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <assignments>
+        <description>Assigns Medium priority to leads with score between 40 and 69.</description>
+        <name>Assign_Medium_Priority</name>
+        <label>Assign Medium Priority</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Lead_Priority__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Medium</stringValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <decisions>
+        <description>Determines lead priority (High, Medium, Low) based on calculated Lead Score.</description>
+        <name>Check_Lead_Priority</name>
+        <label>Check Lead Priority</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Assign_Low_Priority</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Low Priority</defaultConnectorLabel>
+        <rules>
+            <name>High_Priority</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Lead_Score__c</leftValueReference>
+                <operator>GreaterThanOrEqualTo</operator>
+                <rightValue>
+                    <numberValue>70.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Assign_High_Priority</targetReference>
+            </connector>
+            <label>High Priority</label>
+        </rules>
+        <rules>
+            <name>Medium_Priority</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Lead_Score__c</leftValueReference>
+                <operator>GreaterThanOrEqualTo</operator>
+                <rightValue>
+                    <numberValue>40.0</numberValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Lead_Score__c</leftValueReference>
+                <operator>LessThan</operator>
+                <rightValue>
+                    <numberValue>70.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Assign_Medium_Priority</targetReference>
+            </connector>
+            <label>Medium Priority</label>
+        </rules>
+    </decisions>
     <decisions>
         <description>Lead Score should get freeze when Lead Qualified</description>
         <name>Freeze_Score</name>
@@ -45,6 +138,7 @@
             <label>Freeze</label>
         </rules>
     </decisions>
+    <description>Added Lead Priority assignment logic based on Lead Score</description>
     <environments>Default</environments>
     <formulas>
         <name>ExpectedValue_Score_Formula</name>
