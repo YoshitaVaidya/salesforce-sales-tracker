@@ -3,7 +3,14 @@
     <fullName>Email_required_for_selected_lead_source</fullName>
     <active>true</active>
     <description>Ensures email is captured for digital lead sources</description>
-    <errorConditionFormula>ISPICKVAL( Source__c , &quot;Website&quot; )  || ISPICKVAL( Source__c , &quot;Email&quot; )  || ISPICKVAL( Source__c , &quot;Social Media&quot; )  &amp;&amp;  ISBLANK( Email__c )</errorConditionFormula>
+    <errorConditionFormula>AND(
+     OR(
+        ISPICKVAL( Source__c , &quot;Website&quot;),
+        ISPICKVAL( Source__c , &quot;Email&quot; ),
+        ISPICKVAL( Source__c , &quot;Social Media&quot; )
+        ),
+     ISBLANK( Email__c ) 
+)</errorConditionFormula>
     <errorDisplayField>Email__c</errorDisplayField>
     <errorMessage>Email is required for selected lead source</errorMessage>
 </ValidationRule>
